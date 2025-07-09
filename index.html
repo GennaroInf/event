@@ -45,8 +45,7 @@
         Il tuo browser non supporta l'elemento audio.
     </audio>
 
-    <button id="audio-control-button" style="display: none;">Attiva Audio</button>
-
+    <button id="audio-control-button" style="display: block;">Disattiva Audio</button>
     <script>
         // --- Codice per l'effetto di scrittura del testo ---
         const output = document.getElementById("output");
@@ -89,38 +88,40 @@
         typeLine("");
         typeLine("Ti aspetto ❤️");
 
+        // --- Codice per la musica (TENTA l'avvio automatico con volume) ---
         const music = document.getElementById('background-music');
         const audioControlButton = document.getElementById('audio-control-button');
-        let isMuted = false; 
 
-        music.volume = 0.3;
-        music.muted = false; 
+        music.volume = 0.3; // Imposta il volume iniziale (da 0.0 a 1.0)
+        // Rimosso: music.muted = true; // Non tentiamo di farla partire muta qui
 
-        // Tenta di avviare la musica in modalità muta non appena la pagina è caricata
+        // Tenta di avviare la musica automaticamente con volume non appena la pagina è caricata
         window.addEventListener('DOMContentLoaded', () => {
             music.play().then(() => {
-                console.log("Musica avviata (mutata)");
-                audioControlButton.textContent = 'Attiva Audio';
-                audioControlButton.style.display = 'block'; // Mostra il pulsante
+                // Successo: la musica è partita con volume
+                console.log("Musica avviata automaticamente con volume.");
+                audioControlButton.textContent = 'Disattiva Audio';
             }).catch(error => {
-                console.log("Autoplay bloccato dal browser (o altro errore):", error);
-                // Se l'autoplay fallisce, assicurati che il pulsante sia comunque visibile
+                // Fallimento: il browser ha bloccato l'autoplay
+                console.log("Autoplay con volume bloccato dal browser:", error);
+                // Il pulsante deve essere per "Attiva Audio" in caso di blocco iniziale
                 audioControlButton.textContent = 'Attiva Audio';
-                audioControlButton.style.display = 'block';
+                // Imposta la musica come muta per la logica del pulsante
+                music.muted = true;
             });
+            audioControlButton.style.display = 'block'; // Assicurati che il pulsante sia sempre visibile
         });
 
         // Gestione del click sul pulsante per attivare/disattivare l'audio
         audioControlButton.addEventListener('click', () => {
-            if (music.muted) {
+            if (music.paused || music.muted) { // Se la musica è in pausa o muta
                 music.muted = false; // Smuta la musica
-                music.play(); // Assicurati che stia suonando
+                music.play(); // Avvia la riproduzione (se non lo era già)
                 audioControlButton.textContent = 'Disattiva Audio';
-                isMuted = false;
-            } else {
+            } else { // Se sta suonando e non è muta (la mettiamo in pausa/muto)
                 music.muted = true; // Muta la musica
+                // O se vuoi metterla in pausa: music.pause();
                 audioControlButton.textContent = 'Attiva Audio';
-                isMuted = true;
             }
         });
     </script>
