@@ -1,139 +1,70 @@
 <!DOCTYPE html>
-
 <html lang="it">
-
 <head>
-
-  <meta charset="UTF-8" />
-
-  <title>Accesso Riservato</title>
-
-  <style>
-
-    body {
-
-      background-color: black;
-
-      color: #00FF00;
-
-      font-family: monospace;
-
-      white-space: pre-wrap;
-
-      padding: 2rem;
-
-    }
-
-    .cursor {
-
-      display: inline-block;
-
-      width: 10px;
-
-      background-color: #00FF00;
-
-      animation: blink 1s step-start infinite;
-
-    }
-
-    @keyframes blink {
-
-      50% { background-color: transparent; }
-
-    }
-
-  </style>
-
+  <meta charset="UTF-8" />
+  <title>Accesso Riservato</title>
+  <style>
+    body {
+      background-color: black;
+      color: #00FF00;
+      font-family: monospace;
+      white-space: pre-wrap;
+      padding: 2rem;
+    }
+    .cursor {
+      display: inline-block;
+      width: 10px;
+      background-color: #00FF00;
+      animation: blink 1s step-start infinite;
+    }
+    @keyframes blink {
+      50% { background-color: transparent; }
+    }
+  </style>
 </head>
-
 <body>
+  <div id="output"></div><span class="cursor"></span>
 
-  <div id="output"></div><span class="cursor"></span>
-
-
-
-  <script>
-
-    const output = document.getElementById("output");
-
-    let delay = 0;
-
-    function typeLine(text) {
-
-      for (let i = 0; i < text.length; i++) {
-
-        setTimeout(() => {
-
-          output.textContent += text[i];
-
-        }, delay);
-
-        delay += 15;
-
-      }
-
-      delay += 100; 
-
-      setTimeout(() => {
-
-        output.textContent += "\n";
-
-      }, delay - 50);
-
-    }
-
-
+  <script>
+    const output = document.getElementById("output");
+    let delay = 0;
+    function typeLine(text) {
+      for (let i = 0; i < text.length; i++) {
+        setTimeout(() => {
+          output.textContent += text[i];
+        }, delay);
+        delay += 15;
+      }
+      delay += 200; 
+      setTimeout(() => {
+        output.textContent += "\n";
+      }, delay - 100);
+    }
 
 typeLine("Pensavi davvero di trovare delle password?");
-
 typeLine("Magari rubare l’account di qualcuno su Overwatch...");
-
 typeLine("E invece no.");
-
 typeLine("Era solo un clickbait.");
-
 typeLine("Ma dai, non è poi così male. Hai trovato un invito.");
-
 typeLine("");
 
-
-
-    typeLine("🎉 Game Night 🎉");
-
+    typeLine("🎉 Game Night 🎉");
 typeLine("Dalle 21:00 ti aspetto in LOBBY PUG per staccare un po’, ridere, giocare e immortalare qualche figuraccia memorabile.");
-
 typeLine("");
-
-typeLine(" 🎮  Che si fa?");
-
-typeLine("        Giochi stupidi, chiacchiere intelligenti (o viceversa). Comunque zero sbatti.");
-
+typeLine(" 🎮  Che si fa?");
+typeLine("        Giochi stupidi, chiacchiere intelligenti (o viceversa). Comunque zero sbatti.");
 typeLine("");
-
-typeLine(" 👥  Serve esperienza?");
-
-typeLine("        Solo quella nel ridere anche quando si perde malissimo. Quindi no.");
-
+typeLine(" 👥  Serve esperienza?");
+typeLine("        Solo quella nel ridere anche quando si perde malissimo. Quindi no.");
 typeLine("");
-
-typeLine(" ⏰  Se arrivi dopo?");
-
-typeLine("        Nessuno ti guarda male. Ti becchi il prossimo round e via.");
-
+typeLine(" ⏰  Se arrivi dopo?");
+typeLine("        Nessuno ti guarda male. Ti becchi il prossimo round e via.");
 typeLine("");
-
-typeLine(" 🧠  Hai un’idea geniale per un gioco?");
-
-typeLine("        Dilla. O tienila per te e soffri mentre giochiamo a qualcos’altro.");
-
+typeLine(" 🧠  Hai un’idea geniale per un gioco?");
+typeLine("        Dilla. O tienila per te e soffri mentre giochiamo a qualcos’altro.");
 typeLine("");
-
 typeLine("Ti aspetto ❤️");
 
-
-
-  </script>
-
+  </script>
 </body>
-
 </html>
