@@ -21,18 +21,7 @@
             50% { background-color: transparent; }
         }
 
-        /* NUOVO: Stile per nascondere il player YouTube (per avere solo l'audio) */
-        #player {
-            position: absolute; /* Posizionalo fuori dalla vista */
-            left: -9999px;
-            top: -9999px;
-            width: 1px; /* Rendi molto piccolo */
-            height: 1px;
-            opacity: 0; /* Rendi invisibile */
-            pointer-events: none; /* Disabilita interazioni con il mouse */
-        }
-
-        /* NUOVO: Stile per il pulsante Play/Mute (altamente raccomandato per l'audio) */
+        /* Stile per il pulsante Play/Mute dell'audio */
         #audio-control-button {
             position: fixed; /* Rende il pulsante sempre visibile sullo schermo */
             bottom: 20px;
@@ -51,25 +40,29 @@
 <body>
     <div id="output"></div><span class="cursor"></span>
 
+    <audio id="background-music" loop>
+        <source src="il_tuo_brano.mp3" type="audio/mpeg">
+        Il tuo browser non supporta l'elemento audio.
+    </audio>
+
     <button id="audio-control-button" style="display: none;">Attiva Audio</button>
 
-    <div id="player"></div>
-
     <script>
-        // --- Il tuo codice di scrittura del testo esistente ---
+        // --- Codice per l'effetto di scrittura del testo ---
         const output = document.getElementById("output");
         let delay = 0;
+
         function typeLine(text) {
             for (let i = 0; i < text.length; i++) {
                 setTimeout(() => {
                     output.textContent += text[i];
                 }, delay);
-                delay += 15;
+                delay += 15; // Velocità di apparizione del carattere
             }
-            delay += 100;
+            delay += 100; // Ritardo tra una riga e l'altra
             setTimeout(() => {
                 output.textContent += "\n";
-            }, delay - 50);
+            }, delay - 50); // Regolazione per il ritorno a capo
         }
 
         typeLine("Pensavi davvero di trovare delle password?");
@@ -96,82 +89,40 @@
         typeLine("");
         typeLine("Ti aspetto ❤️");
 
-        // --- NUOVO: Codice per il player YouTube ---
-
-        let player; // Variabile globale per l'oggetto player di YouTube
-        // *** INSERISCI QUI L'ID DEL TUO VIDEO YOUTUBE ***
-        const videoId = 'dQw4w9WgXcQ'; // Esempio: 'dQw4w9WgXcQ' (Rick Astley - Never Gonna Give You Up)
+        const music = document.getElementById('background-music');
         const audioControlButton = document.getElementById('audio-control-button');
+        let isMuted = false; 
 
-        // Questa funzione viene richiamata automaticamente quando l'API di YouTube è pronta
-        function onYouTubeIframeAPIReady() {
-            player = new YT.Player('player', {
-                videoId: videoId,
-                playerVars: {
-                    'autoplay': 1,       // Tenta l'autoplay (sarà bloccato dai browser se non muted)
-                    'controls': 0,       // Nasconde i controlli del player
-                    'showinfo': 0,       // Nasconde il titolo del video
-                    'rel': 0,            // Non mostra video correlati alla fine
-                    'modestbranding': 1, // Nasconde il logo YouTube grande
-                    'loop': 1,           // Fa sì che il video si ripeta
-                    'playlist': videoId, // Essenziale per far funzionare 'loop' con un singolo video
-                    'fs': 0,             // Disabilita il pulsante fullscreen
-                    'iv_load_policy': 3, // Nasconde le annotazioni
-                    'mute': 1            // *** AVVIA IL VIDEO MUTED PER AGGIRARE LE RESTRIZIONI DI AUTOPLAY ***
-                },
-                events: {
-                    'onReady': onPlayerReady,
-                    'onStateChange': onPlayerStateChange
-                }
+        music.volume = 0.3;
+        music.muted = false; 
+
+        // Tenta di avviare la musica in modalità muta non appena la pagina è caricata
+        window.addEventListener('DOMContentLoaded', () => {
+            music.play().then(() => {
+                console.log("Musica avviata (mutata)");
+                audioControlButton.textContent = 'Attiva Audio';
+                audioControlButton.style.display = 'block'; // Mostra il pulsante
+            }).catch(error => {
+                console.log("Autoplay bloccato dal browser (o altro errore):", error);
+                // Se l'autoplay fallisce, assicurati che il pulsante sia comunque visibile
+                audioControlButton.textContent = 'Attiva Audio';
+                audioControlButton.style.display = 'block';
             });
-        }
-
-        // Questa funzione viene chiamata quando il player di YouTube è pronto per interagire
-        function onPlayerReady(event) {
-            // Mostra il pulsante di controllo solo dopo che il player è stato caricato e pronto
-            audioControlButton.style.display = 'block';
-
-            // Tenta di riprodurre il video. Essendo 'muted' nelle playerVars, dovrebbe partire.
-            event.target.playVideo();
-        }
-
-        // Questa funzione viene chiamata quando lo stato del player cambia (es. Play, Pausa, Finito)
-        function onPlayerStateChange(event) {
-            // Se il video è finito (stato 0) e loop è attivo (grazie a playerVars), si riavvierà automaticamente.
-            if (event.data === YT.PlayerState.ENDED) {
-                player.playVideo();
-            }
-        }
-
-        // NUOVO: Carica l'API IFrame Player di YouTube in modo asincrono
-        var tag = document.createElement('script');
-        tag.src = "https://www.youtube.com/iframe_api"; // Link corretto all'API
-        var firstScriptTag = document.getElementsByTagName('script')[0];
-        firstScriptTag.parentNode.insertBefore(tag, firstScriptTag);
-
-        // NUOVO: Gestione del pulsante per attivare/disattivare l'audio
-        let isMuted = true; // Il player inizia mutato per conformità con le policy dei browser
-        audioControlButton.addEventListener('click', () => {
-            if (player) { // Controlla che il player sia stato inizializzato
-                if (isMuted) {
-                    player.unMute(); // Smuta il player
-                    player.setVolume(30); // Imposta un volume iniziale (da 0 a 100)
-                    audioControlButton.textContent = 'Disattiva Audio';
-                    isMuted = false;
-                } else {
-                    player.mute(); // Muta il player
-                    audioControlButton.textContent = 'Attiva Audio';
-                    isMuted = true;
-                }
-            }
         });
 
-        setTimeout(() => {
-            if (player && player.getPlayerState() !== YT.PlayerState.PLAYING && player.isMuted()) {
-                 player.playVideo().catch(error => console.log("Errore riproduzione post-testo:", error));
+        // Gestione del click sul pulsante per attivare/disattivare l'audio
+        audioControlButton.addEventListener('click', () => {
+            if (music.muted) {
+                music.muted = false; // Smuta la musica
+                music.play(); // Assicurati che stia suonando
+                audioControlButton.textContent = 'Disattiva Audio';
+                isMuted = false;
+            } else {
+                music.muted = true; // Muta la musica
+                audioControlButton.textContent = 'Attiva Audio';
+                isMuted = true;
             }
-        }, delay + 1000);
-
+        });
     </script>
 </body>
 </html>
