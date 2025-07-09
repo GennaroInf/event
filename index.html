@@ -1,131 +1,139 @@
 <!DOCTYPE html>
+
 <html lang="it">
+
 <head>
-    <meta charset="UTF-8" />
-    <title>Accesso Riservato</title>
-    <style>
-        body {
-            background-color: black;
-            color: #00FF00;
-            font-family: monospace;
-            white-space: pre-wrap;
-            padding: 2rem;
-        }
-        .cursor {
-            display: inline-block;
-            width: 10px;
-            background-color: #00FF00;
-            animation: blink 1s step-start infinite;
-        }
-        @keyframes blink {
-            50% { background-color: transparent; }
-        }
 
-        /* Stile per il pulsante Play/Mute dell'audio */
-        #audio-control-button {
-            position: fixed; /* Rende il pulsante sempre visibile sullo schermo */
-            bottom: 20px;
-            right: 20px;
-            padding: 10px 15px;
-            background-color: #00FF00;
-            color: black;
-            border: none;
-            cursor: pointer;
-            font-family: monospace;
-            z-index: 1000; /* Assicurati che sia sopra altri elementi */
-            font-size: 0.9rem; /* Rendi il testo leggibile */
-        }
-    </style>
+  <meta charset="UTF-8" />
+
+  <title>Accesso Riservato</title>
+
+  <style>
+
+    body {
+
+      background-color: black;
+
+      color: #00FF00;
+
+      font-family: monospace;
+
+      white-space: pre-wrap;
+
+      padding: 2rem;
+
+    }
+
+    .cursor {
+
+      display: inline-block;
+
+      width: 10px;
+
+      background-color: #00FF00;
+
+      animation: blink 1s step-start infinite;
+
+    }
+
+    @keyframes blink {
+
+      50% { background-color: transparent; }
+
+    }
+
+  </style>
+
 </head>
+
 <body>
-    <div id="output"></div><span class="cursor"></span>
 
-    <audio id="background-music" loop>
-        <source src="Rick Astley - Never Gonna Give You Up (Official Video) (4K Remaster).mp4" type="audio/mpeg">
-        Il tuo browser non supporta l'elemento audio.
-    </audio>
+  <div id="output"></div><span class="cursor"></span>
 
-    <button id="audio-control-button" style="display: block;">Disattiva Audio</button>
-    <script>
-        // --- Codice per l'effetto di scrittura del testo ---
-        const output = document.getElementById("output");
-        let delay = 0;
 
-        function typeLine(text) {
-            for (let i = 0; i < text.length; i++) {
-                setTimeout(() => {
-                    output.textContent += text[i];
-                }, delay);
-                delay += 15; // Velocità di apparizione del carattere
-            }
-            delay += 100; // Ritardo tra una riga e l'altra
-            setTimeout(() => {
-                output.textContent += "\n";
-            }, delay - 50); // Regolazione per il ritorno a capo
-        }
 
-        typeLine("Pensavi davvero di trovare delle password?");
-        typeLine("Magari rubare l’account di qualcuno su Overwatch...");
-        typeLine("E invece no.");
-        typeLine("Era solo un clickbait.");
-        typeLine("Ma dai, non è poi così male. Hai trovato un invito.");
-        typeLine("");
+  <script>
 
-        typeLine("🎉 Game Night 🎉");
-        typeLine("Dalle 21:00 ti aspetto in LOBBY PUG per staccare un po’, ridere, giocare e immortalare qualche figuraccia memorabile.");
-        typeLine("");
-        typeLine(" 🎮  Che si fa?");
-        typeLine("        Giochi stupidi, chiacchiere intelligenti (o viceversa). Comunque zero sbatti.");
-        typeLine("");
-        typeLine(" 👥  Serve esperienza?");
-        typeLine("        Solo quella nel ridere anche quando si perde malissimo. Quindi no.");
-        typeLine("");
-        typeLine(" ⏰  Se arrivi dopo?");
-        typeLine("        Nessuno ti guarda male. Ti becchi il prossimo round e via.");
-        typeLine("");
-        typeLine(" 🧠  Hai un’idea geniale per un gioco?");
-        typeLine("        Dilla. O tienila per te e soffri mentre giochiamo a qualcos’altro.");
-        typeLine("");
-        typeLine("Ti aspetto ❤️");
+    const output = document.getElementById("output");
 
-        // --- Codice per la musica (TENTA l'avvio automatico con volume) ---
-        const music = document.getElementById('background-music');
-        const audioControlButton = document.getElementById('audio-control-button');
+    let delay = 0;
 
-        music.volume = 0.3; // Imposta il volume iniziale (da 0.0 a 1.0)
+    function typeLine(text) {
 
-        // Tenta di avviare la musica automaticamente con volume non appena la pagina è caricata
-        window.addEventListener('DOMContentLoaded', () => {
-            // Tentativo di riproduzione diretta (probabilmente bloccato)
-            music.play().then(() => {
-                console.log("Musica avviata automaticamente con volume.");
-                audioControlButton.textContent = 'Disattiva Audio';
-            }).catch(error => {
-                console.log("Autoplay con volume bloccato dal browser (o altro errore):", error);
-                audioControlButton.textContent = 'Attiva Audio';
-                music.muted = true; // Imposta come muto per la logica del pulsante
-            });
+      for (let i = 0; i < text.length; i++) {
 
-            // *** NUOVO: SIMULAZIONE DEL CLICK SUL PULSANTE ***
-            // Attenzione: Molto probabilmente non aggirerà il blocco di autoplay dei browser moderni.
-            // Il browser richiede un'interazione REALE dell'utente.
-            audioControlButton.click(); // Esegue un click programmatico sul pulsante
+        setTimeout(() => {
 
-            audioControlButton.style.display = 'block'; // Assicurati che il pulsante sia sempre visibile
-        });
+          output.textContent += text[i];
 
-        // Gestione del click sul pulsante per attivare/disattivare l'audio
-        audioControlButton.addEventListener('click', () => {
-            if (music.paused || music.muted) { // Se la musica è in pausa o muta
-                music.muted = false; // Smuta la musica
-                music.play(); // Avvia la riproduzione (se non lo era già)
-                audioControlButton.textContent = 'Disattiva Audio';
-            } else { // Se sta suonando e non è muta (la mettiamo in pausa/muto)
-                music.muted = true; // Muta la musica
-                // O se vuoi metterla in pausa: music.pause();
-                audioControlButton.textContent = 'Attiva Audio';
-            }
-        });
-    </script>
+        }, delay);
+
+        delay += 15;
+
+      }
+
+      delay += 100; 
+
+      setTimeout(() => {
+
+        output.textContent += "\n";
+
+      }, delay - 50);
+
+    }
+
+
+
+typeLine("Pensavi davvero di trovare delle password?");
+
+typeLine("Magari rubare l’account di qualcuno su Overwatch...");
+
+typeLine("E invece no.");
+
+typeLine("Era solo un clickbait.");
+
+typeLine("Ma dai, non è poi così male. Hai trovato un invito.");
+
+typeLine("");
+
+
+
+    typeLine("🎉 Game Night 🎉");
+
+typeLine("Dalle 21:00 ti aspetto in LOBBY PUG per staccare un po’, ridere, giocare e immortalare qualche figuraccia memorabile.");
+
+typeLine("");
+
+typeLine(" 🎮  Che si fa?");
+
+typeLine("        Giochi stupidi, chiacchiere intelligenti (o viceversa). Comunque zero sbatti.");
+
+typeLine("");
+
+typeLine(" 👥  Serve esperienza?");
+
+typeLine("        Solo quella nel ridere anche quando si perde malissimo. Quindi no.");
+
+typeLine("");
+
+typeLine(" ⏰  Se arrivi dopo?");
+
+typeLine("        Nessuno ti guarda male. Ti becchi il prossimo round e via.");
+
+typeLine("");
+
+typeLine(" 🧠  Hai un’idea geniale per un gioco?");
+
+typeLine("        Dilla. O tienila per te e soffri mentre giochiamo a qualcos’altro.");
+
+typeLine("");
+
+typeLine("Ti aspetto ❤️");
+
+
+
+  </script>
+
 </body>
+
 </html>
