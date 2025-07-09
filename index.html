@@ -1,70 +1,177 @@
 <!DOCTYPE html>
 <html lang="it">
 <head>
-  <meta charset="UTF-8" />
-  <title>Accesso Riservato</title>
-  <style>
-    body {
-      background-color: black;
-      color: #00FF00;
-      font-family: monospace;
-      white-space: pre-wrap;
-      padding: 2rem;
-    }
-    .cursor {
-      display: inline-block;
-      width: 10px;
-      background-color: #00FF00;
-      animation: blink 1s step-start infinite;
-    }
-    @keyframes blink {
-      50% { background-color: transparent; }
-    }
-  </style>
+    <meta charset="UTF-8" />
+    <title>Accesso Riservato</title>
+    <style>
+        body {
+            background-color: black;
+            color: #00FF00;
+            font-family: monospace;
+            white-space: pre-wrap;
+            padding: 2rem;
+        }
+        .cursor {
+            display: inline-block;
+            width: 10px;
+            background-color: #00FF00;
+            animation: blink 1s step-start infinite;
+        }
+        @keyframes blink {
+            50% { background-color: transparent; }
+        }
+
+        /* NUOVO: Stile per nascondere il player YouTube (per avere solo l'audio) */
+        #player {
+            position: absolute; /* Posizionalo fuori dalla vista */
+            left: -9999px;
+            top: -9999px;
+            width: 1px; /* Rendi molto piccolo */
+            height: 1px;
+            opacity: 0; /* Rendi invisibile */
+            pointer-events: none; /* Disabilita interazioni con il mouse */
+        }
+
+        /* NUOVO: Stile per il pulsante Play/Mute (altamente raccomandato per l'audio) */
+        #audio-control-button {
+            position: fixed; /* Rende il pulsante sempre visibile sullo schermo */
+            bottom: 20px;
+            right: 20px;
+            padding: 10px 15px;
+            background-color: #00FF00;
+            color: black;
+            border: none;
+            cursor: pointer;
+            font-family: monospace;
+            z-index: 1000; /* Assicurati che sia sopra altri elementi */
+            font-size: 0.9rem; /* Rendi il testo leggibile */
+        }
+    </style>
 </head>
 <body>
-  <div id="output"></div><span class="cursor"></span>
+    <div id="output"></div><span class="cursor"></span>
 
-  <script>
-    const output = document.getElementById("output");
-    let delay = 0;
-    function typeLine(text) {
-      for (let i = 0; i < text.length; i++) {
+    <button id="audio-control-button" style="display: none;">Attiva Audio</button>
+
+    <div id="player"></div>
+
+    <script>
+        // --- Il tuo codice di scrittura del testo esistente ---
+        const output = document.getElementById("output");
+        let delay = 0;
+        function typeLine(text) {
+            for (let i = 0; i < text.length; i++) {
+                setTimeout(() => {
+                    output.textContent += text[i];
+                }, delay);
+                delay += 15;
+            }
+            delay += 100;
+            setTimeout(() => {
+                output.textContent += "\n";
+            }, delay - 50);
+        }
+
+        typeLine("Pensavi davvero di trovare delle password?");
+        typeLine("Magari rubare l’account di qualcuno su Overwatch...");
+        typeLine("E invece no.");
+        typeLine("Era solo un clickbait.");
+        typeLine("Ma dai, non è poi così male. Hai trovato un invito.");
+        typeLine("");
+
+        typeLine("🎉 Game Night 🎉");
+        typeLine("Dalle 21:00 ti aspetto in LOBBY PUG per staccare un po’, ridere, giocare e immortalare qualche figuraccia memorabile.");
+        typeLine("");
+        typeLine(" 🎮  Che si fa?");
+        typeLine("        Giochi stupidi, chiacchiere intelligenti (o viceversa). Comunque zero sbatti.");
+        typeLine("");
+        typeLine(" 👥  Serve esperienza?");
+        typeLine("        Solo quella nel ridere anche quando si perde malissimo. Quindi no.");
+        typeLine("");
+        typeLine(" ⏰  Se arrivi dopo?");
+        typeLine("        Nessuno ti guarda male. Ti becchi il prossimo round e via.");
+        typeLine("");
+        typeLine(" 🧠  Hai un’idea geniale per un gioco?");
+        typeLine("        Dilla. O tienila per te e soffri mentre giochiamo a qualcos’altro.");
+        typeLine("");
+        typeLine("Ti aspetto ❤️");
+
+        // --- NUOVO: Codice per il player YouTube ---
+
+        let player; // Variabile globale per l'oggetto player di YouTube
+        // *** INSERISCI QUI L'ID DEL TUO VIDEO YOUTUBE ***
+        const videoId = 'dQw4w9WgXcQ'; // Esempio: 'dQw4w9WgXcQ' (Rick Astley - Never Gonna Give You Up)
+        const audioControlButton = document.getElementById('audio-control-button');
+
+        // Questa funzione viene richiamata automaticamente quando l'API di YouTube è pronta
+        function onYouTubeIframeAPIReady() {
+            player = new YT.Player('player', {
+                videoId: videoId,
+                playerVars: {
+                    'autoplay': 1,       // Tenta l'autoplay (sarà bloccato dai browser se non muted)
+                    'controls': 0,       // Nasconde i controlli del player
+                    'showinfo': 0,       // Nasconde il titolo del video
+                    'rel': 0,            // Non mostra video correlati alla fine
+                    'modestbranding': 1, // Nasconde il logo YouTube grande
+                    'loop': 1,           // Fa sì che il video si ripeta
+                    'playlist': videoId, // Essenziale per far funzionare 'loop' con un singolo video
+                    'fs': 0,             // Disabilita il pulsante fullscreen
+                    'iv_load_policy': 3, // Nasconde le annotazioni
+                    'mute': 1            // *** AVVIA IL VIDEO MUTED PER AGGIRARE LE RESTRIZIONI DI AUTOPLAY ***
+                },
+                events: {
+                    'onReady': onPlayerReady,
+                    'onStateChange': onPlayerStateChange
+                }
+            });
+        }
+
+        // Questa funzione viene chiamata quando il player di YouTube è pronto per interagire
+        function onPlayerReady(event) {
+            // Mostra il pulsante di controllo solo dopo che il player è stato caricato e pronto
+            audioControlButton.style.display = 'block';
+
+            // Tenta di riprodurre il video. Essendo 'muted' nelle playerVars, dovrebbe partire.
+            event.target.playVideo();
+        }
+
+        // Questa funzione viene chiamata quando lo stato del player cambia (es. Play, Pausa, Finito)
+        function onPlayerStateChange(event) {
+            // Se il video è finito (stato 0) e loop è attivo (grazie a playerVars), si riavvierà automaticamente.
+            if (event.data === YT.PlayerState.ENDED) {
+                player.playVideo();
+            }
+        }
+
+        // NUOVO: Carica l'API IFrame Player di YouTube in modo asincrono
+        var tag = document.createElement('script');
+        tag.src = "https://www.youtube.com/iframe_api"; // Link corretto all'API
+        var firstScriptTag = document.getElementsByTagName('script')[0];
+        firstScriptTag.parentNode.insertBefore(tag, firstScriptTag);
+
+        // NUOVO: Gestione del pulsante per attivare/disattivare l'audio
+        let isMuted = true; // Il player inizia mutato per conformità con le policy dei browser
+        audioControlButton.addEventListener('click', () => {
+            if (player) { // Controlla che il player sia stato inizializzato
+                if (isMuted) {
+                    player.unMute(); // Smuta il player
+                    player.setVolume(30); // Imposta un volume iniziale (da 0 a 100)
+                    audioControlButton.textContent = 'Disattiva Audio';
+                    isMuted = false;
+                } else {
+                    player.mute(); // Muta il player
+                    audioControlButton.textContent = 'Attiva Audio';
+                    isMuted = true;
+                }
+            }
+        });
+
         setTimeout(() => {
-          output.textContent += text[i];
-        }, delay);
-        delay += 15;
-      }
-      delay += 100; 
-      setTimeout(() => {
-        output.textContent += "\n";
-      }, delay - 50);
-    }
+            if (player && player.getPlayerState() !== YT.PlayerState.PLAYING && player.isMuted()) {
+                 player.playVideo().catch(error => console.log("Errore riproduzione post-testo:", error));
+            }
+        }, delay + 1000);
 
-typeLine("Pensavi davvero di trovare delle password?");
-typeLine("Magari rubare l’account di qualcuno su Overwatch...");
-typeLine("E invece no.");
-typeLine("Era solo un clickbait.");
-typeLine("Ma dai, non è poi così male. Hai trovato un invito.");
-typeLine("");
-
-    typeLine("🎉 Game Night 🎉");
-typeLine("Dalle 21:00 ti aspetto in LOBBY PUG per staccare un po’, ridere, giocare e immortalare qualche figuraccia memorabile.");
-typeLine("");
-typeLine(" 🎮  Che si fa?");
-typeLine("        Giochi stupidi, chiacchiere intelligenti (o viceversa). Comunque zero sbatti.");
-typeLine("");
-typeLine(" 👥  Serve esperienza?");
-typeLine("        Solo quella nel ridere anche quando si perde malissimo. Quindi no.");
-typeLine("");
-typeLine(" ⏰  Se arrivi dopo?");
-typeLine("        Nessuno ti guarda male. Ti becchi il prossimo round e via.");
-typeLine("");
-typeLine(" 🧠  Hai un’idea geniale per un gioco?");
-typeLine("        Dilla. O tienila per te e soffri mentre giochiamo a qualcos’altro.");
-typeLine("");
-typeLine("Ti aspetto ❤️");
-
-  </script>
+    </script>
 </body>
 </html>
