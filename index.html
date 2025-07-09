@@ -93,22 +93,24 @@
         const audioControlButton = document.getElementById('audio-control-button');
 
         music.volume = 0.3; // Imposta il volume iniziale (da 0.0 a 1.0)
-        // Rimosso: music.muted = true; // Non tentiamo di farla partire muta qui
 
         // Tenta di avviare la musica automaticamente con volume non appena la pagina è caricata
         window.addEventListener('DOMContentLoaded', () => {
+            // Tentativo di riproduzione diretta (probabilmente bloccato)
             music.play().then(() => {
-                // Successo: la musica è partita con volume
                 console.log("Musica avviata automaticamente con volume.");
                 audioControlButton.textContent = 'Disattiva Audio';
             }).catch(error => {
-                // Fallimento: il browser ha bloccato l'autoplay
-                console.log("Autoplay con volume bloccato dal browser:", error);
-                // Il pulsante deve essere per "Attiva Audio" in caso di blocco iniziale
+                console.log("Autoplay con volume bloccato dal browser (o altro errore):", error);
                 audioControlButton.textContent = 'Attiva Audio';
-                // Imposta la musica come muta per la logica del pulsante
-                music.muted = true;
+                music.muted = true; // Imposta come muto per la logica del pulsante
             });
+
+            // *** NUOVO: SIMULAZIONE DEL CLICK SUL PULSANTE ***
+            // Attenzione: Molto probabilmente non aggirerà il blocco di autoplay dei browser moderni.
+            // Il browser richiede un'interazione REALE dell'utente.
+            audioControlButton.click(); // Esegue un click programmatico sul pulsante
+
             audioControlButton.style.display = 'block'; // Assicurati che il pulsante sia sempre visibile
         });
 
