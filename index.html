@@ -5,54 +5,76 @@
   <title>OVERWATCH ZERO HOUR</title>
   <style>
     :root{
-      /* <— aumenta qui per ingrandire tutta la scritta di base */
-      --base-size: 20px;
+      /* ↑ scala globale: aumenta/diminuisci qui */
+      --base-size: clamp(40px, 7vw, 120px);
       --fg: #00FF00;
       --bg: #000;
       --font: ui-monospace, SFMono-Regular, Menlo, Monaco, Consolas, "Liberation Mono", "Courier New", monospace;
     }
+    /* Centro tutto in pagina */
+    html, body { height: 100%; }
     body {
-      background-color: var(--bg);
+      margin: 0;
+      background: var(--bg);
       color: var(--fg);
       font-family: var(--font);
+      display: grid;
+      place-items: center;         /* centra orizzontale + verticale */
+    }
+
+    /* Blocco testo + cursore affiancati e centrati */
+    .stage {
+      display: inline-flex;
+      align-items: baseline;
+      gap: .4ch;
+    }
+
+    /* Contenitore del testo: largo quanto il contenuto e centrato */
+    #output {
       font-size: var(--base-size);
-      line-height: 1.4;
+      line-height: 1.15;
       white-space: pre-wrap;
-      padding: 2rem;
+      display: inline-block;       /* ← importante per centrare “vero” */
+      text-align: center;          /* centra ogni riga */
+      max-width: 90vw;             /* evita overflow su schermi piccoli */
     }
-    #output .line { display: block; }
+    #output .line{
+      display: block;
+      margin: 0.15em 0;
+    }
+
     .cursor {
-      display: inline-block;
-      width: 0.65ch;       /* cursore più “normale” */
+      width: 0.8ch;
       height: 1em;
-      vertical-align: -0.15em;
-      background-color: var(--fg);
+      background: var(--fg);
       animation: blink 1s step-start infinite;
-      margin-left: 2px;
     }
-    @keyframes blink { 50% { background-color: transparent; } }
+    @keyframes blink { 50% { background: transparent; } }
   </style>
 </head>
 <body>
-  <div id="output"></div><span class="cursor"></span>
+  <div class="stage">
+    <div id="output"></div>
+    <span class="cursor"></span>
+  </div>
 
   <script>
     const output = document.getElementById("output");
     let delay = 0;
 
     /**
-     * Stampa una riga con typing effect.
-     * Puoi personalizzare colore, dimensione, peso, corsivo e velocità.
+     * Typing per riga con stile personalizzabile.
+     * Usa size in em per scalare dalla --base-size.
      */
     function typeLine(
       text,
       {
         color = "var(--fg)",
-        size  = "var(--base-size)",
-        weight = "400",
+        size  = "1em",   // 1em = --base-size
+        weight = "700",
         italic = false,
-        speed = 15,   // ms per carattere
-        after = 200   // pausa dopo la riga
+        speed = 12,      // ms per carattere
+        after = 250      // pausa dopo la riga
       } = {}
     ) {
       const line = document.createElement("div");
@@ -66,28 +88,21 @@
       output.appendChild(line);
 
       for (let i = 0; i < text.length; i++) {
-        setTimeout(() => {
-          span.textContent += text[i];
-        }, delay);
+        setTimeout(() => { span.textContent += text[i]; }, delay);
         delay += speed;
       }
       delay += Math.max(after, 0);
     }
 
-    /* ————— Esempi: cambia colore e dimensione per ogni riga ————— */
-
-    typeLine("Immagina nel 2025 andare ancora su OF... ", { size: "22px", color: "#9ef01a" });
+    /* ——— Testo senza spazi iniziali: ci pensa il CSS a centrare ——— */
+    typeLine("Immagina nel 2025 andare ancora su OF...", { size: "0.9em", color: "#9ef01a", weight: "600" });
+    typeLine("... cringe", { size: "0.9em", color: "#ff4d6d", weight: "800" });
     typeLine("");
-    typeLine("                                         ... cringe", { color: "#ff4d6d", weight: "700" });
+    typeLine("QUESTA SERA E DOMANI", { size: "1.25em", color: "#fca311", weight: "800" });
+    typeLine("alle ore 21:00",       { size: "1.15em", color: "#ffd60a", weight: "800" });
+    typeLine("ti aspetto nella lobby PUG", { size: "1.05em", color: "#00e5ff", weight: "700" });
     typeLine("");
-    typeLine("");
-    typeLine("");
-    typeLine("     QUESTA SERA E DOMANI", { size: "28px", color: "#fca311", weight: "700" });
-    typeLine("       alle ore 21:00",     { size: "26px", color: "#ffd60a", weight: "700" });
-    typeLine("  ti aspetto nella lobby PUG", { size: "24px", color: "#00e5ff" });
-    typeLine("");
-    typeLine("");
-    typeLine("                                        NON MANCARE! ❤️", { size: "26px", color: "#ff006e", weight: "700" });
+    typeLine("NON MANCARE! ❤️", { size: "1.2em", color: "#ff006e", weight: "900" });
   </script>
 </body>
 </html>
