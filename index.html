@@ -4,22 +4,33 @@
   <meta charset="UTF-8" />
   <title>OVERWATCH ZERO HOUR</title>
   <style>
+    :root{
+      /* <— aumenta qui per ingrandire tutta la scritta di base */
+      --base-size: 20px;
+      --fg: #00FF00;
+      --bg: #000;
+      --font: ui-monospace, SFMono-Regular, Menlo, Monaco, Consolas, "Liberation Mono", "Courier New", monospace;
+    }
     body {
-      background-color: black;
-      color: #00FF00;
-      font-family: monospace;
+      background-color: var(--bg);
+      color: var(--fg);
+      font-family: var(--font);
+      font-size: var(--base-size);
+      line-height: 1.4;
       white-space: pre-wrap;
       padding: 2rem;
     }
+    #output .line { display: block; }
     .cursor {
       display: inline-block;
-      width: 100px;
-      background-color: #00FF00;
+      width: 0.65ch;       /* cursore più “normale” */
+      height: 1em;
+      vertical-align: -0.15em;
+      background-color: var(--fg);
       animation: blink 1s step-start infinite;
+      margin-left: 2px;
     }
-    @keyframes blink {
-      50% { background-color: transparent; }
-    }
+    @keyframes blink { 50% { background-color: transparent; } }
   </style>
 </head>
 <body>
@@ -28,32 +39,55 @@
   <script>
     const output = document.getElementById("output");
     let delay = 0;
-    function typeLine(text) {
+
+    /**
+     * Stampa una riga con typing effect.
+     * Puoi personalizzare colore, dimensione, peso, corsivo e velocità.
+     */
+    function typeLine(
+      text,
+      {
+        color = "var(--fg)",
+        size  = "var(--base-size)",
+        weight = "400",
+        italic = false,
+        speed = 15,   // ms per carattere
+        after = 200   // pausa dopo la riga
+      } = {}
+    ) {
+      const line = document.createElement("div");
+      line.className = "line";
+      const span = document.createElement("span");
+      span.style.color = color;
+      span.style.fontSize = size;
+      span.style.fontWeight = weight;
+      if (italic) span.style.fontStyle = "italic";
+      line.appendChild(span);
+      output.appendChild(line);
+
       for (let i = 0; i < text.length; i++) {
         setTimeout(() => {
-          output.textContent += text[i];
+          span.textContent += text[i];
         }, delay);
-        delay += 15;
+        delay += speed;
       }
-      delay += 200; 
-      setTimeout(() => {
-        output.textContent += "\n";
-      }, delay - 100);
+      delay += Math.max(after, 0);
     }
 
-typeLine("Immagina nel 2025 andare ancora su OF... ");
-typeLine("");
-typeLine("                                         ... cringe");
-typeLine("");
-typeLine("");
-typeLine("");
-typeLine("     QUESTA SERA E DOMANI");
-typeLine("       alle ore 21:00");
-typeLine("  ti aspetto nella lobby PUG");
-typeLine("");
-typeLine("");
-typeLine("                                        NON MANCARE! ❤️");
+    /* ————— Esempi: cambia colore e dimensione per ogni riga ————— */
 
+    typeLine("Immagina nel 2025 andare ancora su OF... ", { size: "22px", color: "#9ef01a" });
+    typeLine("");
+    typeLine("                                         ... cringe", { color: "#ff4d6d", weight: "700" });
+    typeLine("");
+    typeLine("");
+    typeLine("");
+    typeLine("     QUESTA SERA E DOMANI", { size: "28px", color: "#fca311", weight: "700" });
+    typeLine("       alle ore 21:00",     { size: "26px", color: "#ffd60a", weight: "700" });
+    typeLine("  ti aspetto nella lobby PUG", { size: "24px", color: "#00e5ff" });
+    typeLine("");
+    typeLine("");
+    typeLine("                                        NON MANCARE! ❤️", { size: "26px", color: "#ff006e", weight: "700" });
   </script>
 </body>
 </html>
