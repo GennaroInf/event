@@ -2,107 +2,242 @@
 <html lang="it">
 <head>
   <meta charset="UTF-8" />
-  <title>OVERWATCH ZERO HOUR</title>
+  <meta name="viewport" content="width=device-width, initial-scale=1" />
+  <title>OVERWATCH – Frasi d'impatto</title>
   <style>
     :root{
-      /* ↑ scala globale: aumenta/diminuisci qui */
-      --base-size: clamp(30px, 7vw, 100px);
-      --fg: #00FF00;
+      /* Margine interno virtuale usato per il fit (0.92 = 92% della finestra) */
+      --fit-pad: 0.92;
       --bg: #000;
-      --font: ui-monospace, SFMono-Regular, Menlo, Monaco, Consolas, "Liberation Mono", "Courier New", monospace;
+      --white: #fff;
+      --red: #ff0033;
     }
-    /* Centro tutto in pagina */
+
     html, body { height: 100%; }
     body {
       margin: 0;
       background: var(--bg);
-      color: var(--fg);
-      font-family: var(--font);
+      color: var(--white);
+      font-family: system-ui, -apple-system, Segoe UI, Roboto, Ubuntu, Cantarell, Noto Sans, Arial, Helvetica, "Apple Color Emoji", "Segoe UI Emoji";
+      overflow: hidden;
+    }
+
+    /* Area di scena a pieno schermo */
+    .app {
+      position: relative;
+      width: 100vw;
+      height: 100svh; /* usa la small viewport height per mobile */
       display: grid;
-      place-items: center;         /* centra orizzontale + verticale */
+      place-items: center;
+      isolation: isolate;
     }
 
-    /* Blocco testo + cursore affiancati e centrati */
-    .stage {
-      display: inline-flex;
-      align-items: baseline;
-      gap: .4ch;
+    /* SLIDE intere (una frase alla volta) */
+    .slide {
+      position: absolute;
+      inset: 0;
+      display: grid;
+      place-items: center;
+      opacity: 0;
+      transition: opacity 350ms ease;
+      z-index: 1;
+    }
+    .slide.show { opacity: 1; }
+
+    .slide .text {
+      font-weight: 900;
+      line-height: .9;
+      white-space: nowrap; /* una riga piena */
+      text-transform: uppercase;
+      text-align: center;
+      will-change: font-size;
+      /* un tocco d'impatto */
+      letter-spacing: .02em;
     }
 
-    /* Contenitore del testo: largo quanto il contenuto e centrato */
-    #output {
-      font-size: var(--base-size);
-      line-height: 1.15;
-      white-space: pre-wrap;
-      display: inline-block;       /* ← importante per centrare “vero” */
-      text-align: center;          /* centra ogni riga */
-      max-width: 90vw;             /* evita overflow su schermi piccoli */
+    /* PHASE 2: blocco a 3 righe che resta visibile */
+    .phase2 {
+      position: absolute;
+      inset: 0;
+      display: grid;
+      place-items: center;
+      opacity: 0;
+      transition: opacity 350ms ease;
+      z-index: 2;
     }
-    #output .line{
-      display: block;
-      margin: 0.15em 0;
+    .phase2.show { opacity: 1; }
+
+    .block {
+      display: grid;
+      text-transform: uppercase;
+      text-align: center;
+      line-height: .95;
+      gap: .15em;           /* spazio tra le righe, in em così scala con il font */
+      will-change: font-size;
+      padding-inline: 2vw;  /* un filo di respiro ai lati */
+    }
+    .line {
+      font-weight: 900;
+      opacity: 0;
+      transform: translateY(.35em);
+      filter: blur(6px);
+      transition: opacity 550ms ease, transform 550ms ease, filter 550ms ease;
+    }
+    .line.revealed {
+      opacity: 1;
+      transform: translateY(0);
+      filter: blur(0);
     }
 
-    .cursor {
-      width: 0.8ch;
-      height: 1em;
-      background: var(--fg);
-      animation: blink 1s step-start infinite;
+    /* Messaggio in basso a sinistra che compare dopo ~1s */
+    .corner {
+      position: absolute;
+      left: 3vw;
+      bottom: 3vh;
+      text-transform: uppercase;
+      font-weight: 800;
+      letter-spacing: .02em;
+      opacity: 0;
+      transform: translateY(0.5em);
+      filter: blur(6px);
+      transition: opacity 600ms ease, transform 600ms ease, filter 600ms ease;
+      color: var(--white);
+      font-size: clamp(14px, 2.2vw, 38px);
+      pointer-events: none;
+      z-index: 3;
     }
-    @keyframes blink { 50% { background: transparent; } }
+    .corner.show { opacity: 1; transform: translateY(0); filter: blur(0); }
   </style>
 </head>
 <body>
-  <div class="stage">
-    <div id="output"></div>
-    <span class="cursor"></span>
+  <div class="app" id="app">
+    <!-- Slide 1 e 2 a pieno schermo -->
+    <section class="slide" id="slide1">
+      <div class="text" id="text1" style="color: var(--white)">
+        IMMAGINA NEL 2025 ANDARE ANCORA SU OF...
+      </div>
+    </section>
+
+    <section class="slide" id="slide2">
+      <div class="text" id="text2" style="color: var(--red)">CRINGE!</div>
+    </section>
+
+    <!-- Fase 2: tre righe che rimangono -->
+    <section class="phase2" id="phase2">
+      <div class="block" id="block">
+        <div class="line" id="l1">QUESTA SERA E DOMANI</div>
+        <div class="line" id="l2">ALLE ORE 21:00</div>
+        <div class="line" id="l3">TI ASPETTO NELLA LOBBY PUG</div>
+        <div class="line" id="l4">SUL DISCORD DI OVERWATCH ITALIA ZERO HOUR</div>
+      </div>
+    </section>
+    <div class="corner" id="corner">NON MANCARE! ❤️</div>
   </div>
 
   <script>
-    const output = document.getElementById("output");
-    let delay = 0;
+    // ————— UTIL: adatta il font alla finestra (ricerca binaria) —————
+    function fitToViewport(element, container, padFactor = parseFloat(getComputedStyle(document.documentElement).getPropertyValue('--fit-pad')) || 0.92) {
+      const maxW = container.clientWidth * padFactor;
+      const maxH = container.clientHeight * padFactor;
 
-    /**
-     * Typing per riga con stile personalizzabile.
-     * Usa size in em per scalare dalla --base-size.
-     */
-    function typeLine(
-      text,
-      {
-        color = "var(--fg)",
-        size  = "1em",   // 1em = --base-size
-        weight = "700",
-        italic = false,
-        speed = 12,      // ms per carattere
-        after = 250      // pausa dopo la riga
-      } = {}
-    ) {
-      const line = document.createElement("div");
-      line.className = "line";
-      const span = document.createElement("span");
-      span.style.color = color;
-      span.style.fontSize = size;
-      span.style.fontWeight = weight;
-      if (italic) span.style.fontStyle = "italic";
-      line.appendChild(span);
-      output.appendChild(line);
+      let lo = 8;   // px min
+      let hi = 1000; // px max
+      let best = lo;
 
-      for (let i = 0; i < text.length; i++) {
-        setTimeout(() => { span.textContent += text[i]; }, delay);
-        delay += speed;
+      const style = element.style;
+      // Assicuriamoci che la misura sia aggiornata
+      style.fontSize = lo + 'px';
+
+      for (let i = 0; i < 14; i++) { // 14 iterazioni ~1/16384 precisione
+        const mid = (lo + hi) / 2;
+        style.fontSize = mid + 'px';
+        const { scrollWidth, scrollHeight } = element;
+        if (scrollWidth <= maxW && scrollHeight <= maxH) {
+          best = mid;
+          lo = mid; // possiamo provare più grande
+        } else {
+          hi = mid; // troppo grande, riduci
+        }
       }
-      delay += Math.max(after, 0);
+      style.fontSize = Math.floor(best) + 'px';
     }
 
-    /* ——— Testo senza spazi iniziali: ci pensa il CSS a centrare ——— */
-    typeLine("Immagina nel 2025 andare ancora su OF...", { size: "0.9em", color: "#9ef01a", weight: "600" });
-    typeLine("... cringe", { size: "0.9em", color: "#ff4d6d", weight: "800" });
-    typeLine("");
-    typeLine("QUESTA SERA E DOMANI", { size: "1.25em", color: "#fca311", weight: "800" });
-    typeLine("alle ore 21:00",       { size: "1.15em", color: "#ffd60a", weight: "800" });
-    typeLine("ti aspetto nella lobby PUG", { size: "1.05em", color: "#00e5ff", weight: "700" });
-    typeLine("");
-    typeLine("NON MANCARE! ❤️", { size: "1.2em", color: "#ff006e", weight: "900" });
+    function fitBlock(blockEl, container) {
+      // Adatta l'intero blocco (3 righe) nel viewport
+      fitToViewport(blockEl, container);
+    }
+
+    // ————— Sequenza —————
+    const app = document.getElementById('app');
+    const slide1 = document.getElementById('slide1');
+    const slide2 = document.getElementById('slide2');
+    const text1  = document.getElementById('text1');
+    const text2  = document.getElementById('text2');
+
+    const phase2 = document.getElementById('phase2');
+    const block  = document.getElementById('block');
+    const l1 = document.getElementById('l1');
+    const l2 = document.getElementById('l2');
+    const l3 = document.getElementById('l3');
+    const l4 = document.getElementById('l4');
+    const corner = document.getElementById('corner');
+
+    // Parametri di timing (ms)
+    const SHOW_1 = 1600; // durata visibile slide 1
+    const SHOW_2 = 1100; // durata visibile slide 2
+    const GAP_FADE = 350; // durata fade fra slide
+    const LINE_STAGGER = 650; // distanza fra le righe della fase 2
+
+    const CORNER_DELAY = 1000; // attesa (~1s) prima di mostrare il messaggio in basso
+
+    function show(el){ el.classList.add('show'); }
+    function hide(el){ el.classList.remove('show'); }
+
+    function sequence(){
+      // Fit iniziale
+      fitToViewport(text1, app);
+      fitToViewport(text2, app);
+
+      // Slide 1
+      show(slide1);
+      setTimeout(() => {
+        hide(slide1);
+        // Slide 2
+        setTimeout(() => {
+          show(slide2);
+          setTimeout(() => {
+            hide(slide2);
+            // Phase 2
+            setTimeout(() => {
+              fitBlock(block, app);
+              show(phase2);
+              // Rivela le righe una alla volta
+              setTimeout(() => l1.classList.add('revealed'), 50);
+              setTimeout(() => l2.classList.add('revealed'), 50 + LINE_STAGGER);
+              setTimeout(() => l3.classList.add('revealed'), 50 + LINE_STAGGER * 2);
+              setTimeout(() => l4.classList.add('revealed'), 50 + LINE_STAGGER * 3);
+              setTimeout(() => corner.classList.add('show'), 50 + LINE_STAGGER * 3 + CORNER_DELAY);
+            }, GAP_FADE);
+          }, SHOW_2);
+        }, GAP_FADE);
+      }, SHOW_1);
+    }
+
+    // Rifit su resize/orientamento
+    function refitAll(){
+      if (slide1.classList.contains('show')) fitToViewport(text1, app);
+      if (slide2.classList.contains('show')) fitToViewport(text2, app);
+      if (phase2.classList.contains('show')) fitBlock(block, app);
+    }
+
+    window.addEventListener('resize', () => {
+      // debounce semplice
+      clearTimeout(window.__refitTimer);
+      window.__refitTimer = setTimeout(refitAll, 80);
+    });
+
+    // Avvio
+    sequence();
   </script>
 </body>
 </html>
